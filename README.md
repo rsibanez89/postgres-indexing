@@ -33,7 +33,9 @@ To connect to the database using psql:
 Some useful commands in psql:
 > `SET schema 'webstore';` \
   `\d` \
-  `\d product`
+  `\d product` \
+  `\dt *.*` \
+  `\dnS`
 
 ## Using the pgadmin web interface
 Go to `http://localhost:5050` and log in with the credentials `root@email.com` and `root`.

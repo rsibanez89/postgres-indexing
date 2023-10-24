@@ -1,4 +1,4 @@
--- This script will recreate the webstore schema, deleting everything.
+-- This script will recreate the webstore schema, deleting everything and inserting test data.
 
 DROP SCHEMA IF EXISTS webstore CASCADE;
 CREATE SCHEMA webstore;
