@@ -1,8 +1,8 @@
 pgadmin/*
 schema/*
-!schema/1.schema.sql
-!schema/2.testdata.sql
-!schema/3.select.sql
-!schema/4.explain.sql
+!schema/1.page-layout.sql
+!schema/2.system-catalog-tables.sql
+!schema/3.indexing.sql
+
 
 .~lock.*
