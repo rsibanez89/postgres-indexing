@@ -1,5 +1,8 @@
 pgadmin/*
 schema/*
 !schema/1.schema.sql
-!schema/2.select.sql
-!schema/3.explain.sql
+!schema/2.testdata.sql
+!schema/3.select.sql
+!schema/4.explain.sql
+
+.~lock.*
