@@ -103,3 +103,35 @@ WHERE store_id = 5;
 --   cpu_operator_cost = 0.0025
 -- 
 -- Then: cost = 1.0 * 32769 + 0.01 * 1,999,957 + 0.0025 * 1,999,957 = 57768.4625 
+
+
+-- EXPLAINER ANALYSE
+EXPLAIN (BUFFERS, ANALYSE) SELECT *
+FROM product
+WHERE store_id = 5;
+
+--                                                     QUERY PLAN
+-- ------------------------------------------------------------------------------------------------------------------
+--  Seq Scan on product  (cost=0.00..57768.46 rows=204129 width=95) (actual time=5.061..844.845 rows=200000 loops=1)
+--    Filter: (store_id = 5)
+--    Rows Removed by Filter: 1800000
+--    Buffers: shared read=32769
+--  Planning Time: 0.101 ms
+--  Execution Time: 852.886 ms
+-- (6 rows)
+
+-- Adding Buffers and Analyse to the explain command, we can see the actual time and the actual number of rows.
+-- We can see that the query took 844.845 ms to execute.
+-- Buffers shows that the query read 32769 pages, as expected.
+-- We can see that the query returned 200000 rows, as expected.
+
+
+-- Let's create an index
+CREATE INDEX ix_product
+ON product
+USING btree (store_id);
+
+-- EXPLAINER
+EXPLAIN SELECT *
+FROM product
+WHERE store_id = 5;
