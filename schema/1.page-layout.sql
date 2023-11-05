@@ -59,6 +59,6 @@ SELECT
   pg_indexes_size('customer') as indexes,
   pg_total_relation_size('customer') as total; -- Table size + indexes size
 
--- Tere is alsp
+-- There is also an extension that can help you to see the table statistics.
 CREATE EXTENSION pgstattuple;
 SELECT * FROM pgstattuple('customer');

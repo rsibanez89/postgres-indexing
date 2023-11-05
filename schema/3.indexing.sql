@@ -41,8 +41,8 @@ SELECT
     relkind, -- Table (r), Index (i), View (v), TOAST(t)  
     relpages, -- Number of pages
     to_char(reltuples, '999,999,999') as reltuples, -- Number of rows
-    relhasindex  -- Has an index
-    --,reltoastrelid::regclass -- TOAST table
+    relhasindex,  -- Has an index
+    reltoastrelid::regclass -- TOAST table
 FROM pg_class 
 WHERE relname = 'product';
 
