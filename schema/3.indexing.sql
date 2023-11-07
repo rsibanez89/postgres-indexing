@@ -131,7 +131,51 @@ CREATE INDEX ix_product
 ON product
 USING btree (store_id);
 
--- EXPLAINER
-EXPLAIN SELECT *
+-- EXPLAINER ANALYSE
+EXPLAIN (BUFFERS, ANALYSE) SELECT *
 FROM product
 WHERE store_id = 5;
+
+--                                                            QUERY PLAN
+-- --------------------------------------------------------------------------------------------------------------------------------
+--  Bitmap Heap Scan on product  (cost=2278.46..37599.12 rows=204133 width=95) (actual time=14.175..392.808 rows=200000 loops=1)
+--    Recheck Cond: (store_id = 5)
+--    Heap Blocks: exact=32769
+--    Buffers: shared hit=3 read=32941
+--    ->  Bitmap Index Scan on ix_product  (cost=0.00..2227.42 rows=204133 width=0) (actual time=9.767..9.767 rows=200000 loops=1)
+--          Index Cond: (store_id = 5)
+--          Buffers: shared hit=3 read=172
+--  Planning:
+--    Buffers: shared hit=76 read=23
+--  Planning Time: 4.695 ms
+--  Execution Time: 399.020 ms
+-- (11 rows)
+
+-- After the index on store_id was created, we can se that the query took 392.808 ms to execute.
+-- The query initially use the indes ix_product to find the rows that match the condition store_id = 5.
+-- For each row found, the query access the table product to get the other columns.
+
+
+-- CLUSTERING
+CLUSTER product USING ix_product;
+
+-- EXPLAINER ANALYSE
+EXPLAIN (BUFFERS, ANALYSE) SELECT *
+FROM product
+WHERE store_id = 5;
+
+--                                                            QUERY PLAN
+-- --------------------------------------------------------------------------------------------------------------------------------
+--  Bitmap Heap Scan on product  (cost=2278.46..37599.12 rows=204133 width=95) (actual time=5.576..20.720 rows=200000 loops=1)
+--    Recheck Cond: (store_id = 5)
+--    Heap Blocks: exact=3278
+--    Buffers: shared read=3450
+--    ->  Bitmap Index Scan on ix_product  (cost=0.00..2227.42 rows=204133 width=0) (actual time=5.215..5.216 rows=200000 loops=1)
+--          Index Cond: (store_id = 5)
+--          Buffers: shared read=172
+--  Planning:
+--    Buffers: shared hit=20 read=2
+--  Planning Time: 0.207 ms
+--  Execution Time: 25.357 ms
+
+-- After the table has been clustered, we can see that the query took 25.375 ms to execute.
