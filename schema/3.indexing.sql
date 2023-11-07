@@ -56,9 +56,10 @@ FROM pg_class t
     JOIN pg_class ti ON i.indexrelid = ti.oid
 WHERE t.relname = 'product';
 
---  relname | relpages |  reltuples   | relhasindex |      reltoastrelid      |  indexrelid  | indisunique | indisprimary | indisclustered | indkey | indpred
--- ---------+----------+--------------+-------------+-------------------------+--------------+-------------+--------------+----------------+--------+---------
---  product |    32769 |    1,999,957 | t           | pg_toast.pg_toast_32809 | product_pkey | t           | t            | f              | 1      |
+ relname | relpages |  reltuples   | relhasindex |      reltoastrelid      |  indexrelid  | indisunique | indisprimary | indisclustered | indkey | indpred | relpages |  reltuples
+---------+----------+--------------+-------------+-------------------------+--------------+-------------+--------------+----------------+--------+---------+----------+--------------
+ product |        0 |           -1 | t           | pg_toast.pg_toast_40971 | product_pkey | t           | t            | f              | 1      |         |        1 |       0
+(1 row)
 
 -- We can see the number of pages 32769
 -- We can see the number of tuples 1,999,957 (~2M rows)
@@ -178,4 +179,4 @@ WHERE store_id = 5;
 --  Planning Time: 0.207 ms
 --  Execution Time: 25.357 ms
 
--- After the table has been clustered, we can see that the query took 25.375 ms to execute.
+-- After the table has been clustered, we can see that the query took 25.375 ms to execute.  
