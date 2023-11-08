@@ -182,6 +182,8 @@ FROM pg_type;
 
 
 CREATE TABLE simple_type_check (
+    oid OID NOT NULL,
+    boolean BOOLEAN NOT NULL,
     integer INTEGER NOT NULL,
     bigint BIGINT NOT NULL,
     numeric NUMERIC(10,2) NOT NULL,
@@ -190,25 +192,28 @@ CREATE TABLE simple_type_check (
     jsonb JSONB NOT NULL,
     text TEXT NOT NULL,
     varchar VARCHAR(100) NOT NULL,
-    inet INET NOT NULL
+    uuid UUID NOT NULL,
+    inet INET NOT NULL,
+    blob BYTEA NOT NULL
 );
 
 SELECT
     attname, -- Column name
-    atttypid::regtype, -- Column type
-    attcompression, -- Compression
     attstorage -- plain(p), external (e), main (m), extended (x)
 FROM pg_attribute
 WHERE attrelid = 'simple_type_check'::regclass AND attnum > 0;
 
---  attname |     atttypid      | attcompression | attstorage
--- ---------+-------------------+----------------+------------
---  integer | integer           |                | p
---  bigint  | bigint            |                | p
---  numeric | numeric           |                | m
---  decimal | numeric           |                | m
---  json    | json              |                | x
---  jsonb   | jsonb             |                | x
---  text    | text              |                | x
---  varchar | character varying |                | x
---  inet    | inet              |                | m
+--  attname | attstorage
+-- ---------+------------
+--  boolean | p
+--  integer | p
+--  bigint  | p
+--  numeric | m
+--  decimal | m
+--  json    | x
+--  jsonb   | x
+--  text    | x
+--  varchar | x
+--  uuid    | p
+--  inet    | m
+--  blob    | x --> defualt storage is extended (x). It may change to external if the file is too big or does it need to be manually set to external?
