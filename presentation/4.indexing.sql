@@ -33,6 +33,7 @@ SELECT * FROM product LIMIT 3;
 
 SELECT count(*) FROM product; -- 2M rows
 
+VACUUM product; -- Update statistics
 
 -- Number of pages in the table product
 SELECT
@@ -56,15 +57,15 @@ FROM pg_class t
     JOIN pg_class ti ON i.indexrelid = ti.oid
 WHERE t.relname = 'product';
 
- relname | relpages |  reltuples   | relhasindex |      reltoastrelid      |  indexrelid  | indisunique | indisprimary | indisclustered | indkey | indpred | relpages |  reltuples
----------+----------+--------------+-------------+-------------------------+--------------+-------------+--------------+----------------+--------+---------+----------+--------------
- product |        0 |           -1 | t           | pg_toast.pg_toast_40971 | product_pkey | t           | t            | f              | 1      |         |        1 |       0
-(1 row)
+--  relname | relpages |  reltuples   | relhasindex |      reltoastrelid      |  indexrelid  | indisunique | indisprimary | indisclustered | indkey | indpred | relpages |  reltuples   
+-- ---------+----------+--------------+-------------+-------------------------+--------------+-------------+--------------+----------------+--------+---------+----------+--------------
+--  product |    32769 |    2,000,000 | t           | pg_toast.pg_toast_16467 | product_pkey | t           | t            | f              | 1      |         |     5486 |    2,000,000
+
 
 -- We can see the number of pages 32769
--- We can see the number of tuples 1,999,957 (~2M rows)
+-- We can see the number of tuples 2M rows
 -- We can see that the table has an index (unique index on id)
--- We cam see that the table has a TOAST table
+-- We can see that the table has a TOAST table (not used in this case SELECT * FROM pg_toast.pg_toast_16467;) 
 
 SELECT
     t.relname, -- Relation name

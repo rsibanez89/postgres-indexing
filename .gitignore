@@ -1,8 +1,5 @@
 pgadmin/*
 schema/*
-!schema/1.page-layout.sql
-!schema/2.system-catalog-tables.sql
-!schema/3.indexing.sql
-
+!schema/1.schema.sql
 
 .~lock.*

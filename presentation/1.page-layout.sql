@@ -44,21 +44,3 @@ VACUUM customer; -- Update statistics
 
 SELECT pg_relation_size('customer'); -- 8192 bytes. Why?
 -- The table main data size is still 1 page, because some rows columns are using compression.
--- To see that let's go to the next script.
-
-
-
--- Also note that the total table size includes the main data, the free space map, the visibility map, the init fork, and the TOAST data. (except indexes)
-SELECT pg_size_pretty(pg_relation_size('customer'));
-SELECT
-  pg_relation_size('customer', 'main') as main, -- The size of the main data.
-  pg_relation_size('customer', 'fsm') as fsm, -- The free space map size. (FSM) is used to keep track of available space in the relation.
-  pg_relation_size('customer', 'vm') as vm, -- The size of the visibility map (VM) for the relation. (VM) is used to keep track of which pages contain only tuples that are known to be visible to all active transactions
-  pg_relation_size('customer', 'init') as init, 
-  pg_table_size('customer'), 
-  pg_indexes_size('customer') as indexes,
-  pg_total_relation_size('customer') as total; -- Table size + indexes size
-
--- There is also an extension that can help you to see the table statistics.
-CREATE EXTENSION pgstattuple;
-SELECT * FROM pgstattuple('customer');

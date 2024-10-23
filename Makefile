@@ -1,6 +1,6 @@
 up:
 	docker-compose down
-	docker-compose up --build
+	docker-compose up --build -d
 
 install_pg_stats:
 	docker exec -it postgres su - postgres -c "psql -c 'CREATE EXTENSION IF NOT EXISTS pg_stat_statements;'"
@@ -20,3 +20,7 @@ dump:
 
 restore:
 	docker exec -it postgres su - postgres -c "psql < ../../../schema/db.sql"
+
+# Utils
+stop_all:
+	docker stop $$(docker ps -a -q) || true

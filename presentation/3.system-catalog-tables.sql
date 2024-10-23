@@ -7,21 +7,45 @@
 SELECT nspname 
 FROM pg_namespace; -- List all schemas
 
+--       nspname       
+-- --------------------
+--  pg_toast
+--  pg_catalog
+--  public
+--  information_schema
+--  webstore
+
+-- The default schemas are:
+-- * pg_toast: TOAST (The Oversized-Attribute Storage Technique) tables are used to store large values that are compressed and/or broken up into smaller pieces.
+-- * pg_catalog: System catalog tables are stored in this schema. For example, pg_namespace, pg_class, pg_attribute, pg_index, pg_type, etc.
+-- * public: The default schema for new tables.
+-- * information_schema: A standard schema that is part of the SQL standard. It contains views that provide information about the database system.
+
+SELECT
+    table_catalog, -- Database name
+    table_schema, -- Schema name
+    table_name, -- Table name
+    table_type, -- BASE TABLE, VIEW, TEMPORARY, etc
+    is_insertable_into -- Is read-only or not
+FROM information_schema.tables;
+
 VACUUM customer; -- Update statistics
 
 SELECT
     oid, -- Object identifier 
+    relnamespace::regnamespace, -- Schema
     relname, -- Relation name
     relkind, -- Table (r), Index (i), View (v), TOAST(t)  
     relpages, -- Number of pages
     reltuples, -- Number of rows
     relhasindex  -- Has an index
 FROM pg_class 
-WHERE relname = 'customer';
-
---   oid  | relname  | relkind | relpages | reltuples | relhasindex
--- -------+----------+---------+----------+-----------+-------------
---  32781 | customer | r       |        1 |        40 | f
+WHERE relnamespace::regnamespace = 'webstore'::regnamespace
+;
+  
+--   oid  | relnamespace | relname  | relkind | relpages | reltuples | relhasindex 
+-- -------+--------------+----------+---------+----------+-----------+-------------
+--  16404 | webstore     | customer | r       |        1 |        40 | f
 
 
 CREATE INDEX ix_customer ON customer USING btree (id, email);
@@ -43,18 +67,30 @@ WHERE indexrelid = 'ix_customer'::regclass;
 SELECT
     attname, -- Column name
     atttypid::regtype, -- Column type
-    attnum, -- Column number withing the table
-    attnotnull, -- Not NULL Constraint
-    attcompression, -- Compression
+    attnum, -- Column number within the table
+    attlen, -- Length of the column type
+    attnotnull, -- Not NULL constraint
+    attcompression, -- Compression using the Lempel-Ziv algorithm (pglz, lz4 or none).
     attstorage -- plain(p), external (e), main (m), extended (x)
 FROM pg_attribute
 WHERE attrelid = 'customer'::regclass AND attnum > 0;
 
---   attname  |     atttypid      | attnum | attnotnull | attcompression | attstorage
--- -----------+-------------------+--------+------------+----------------+------------
---  id        | bigint            |      1 | t          |                | p
---  full_name | character varying |      2 | t          |                | x
---  email     | character varying |      3 | t          |                | x
+--   attname  |     atttypid      | attnum | attlen | attnotnull | attcompression | attstorage 
+-- -----------+-------------------+--------+--------+------------+----------------+------------
+--  id        | bigint            |      1 |      8 | t          |                | p
+--  full_name | character varying |      2 |     -1 | t          |                | x
+--  email     | character varying |      3 |     -1 | t          |                | x
+
+-- attlen: -1 means variable length
+
+-- For attstorage, the storage strategy types are:
+--  * plain (p): prevents either compression or out-of-line storage. Is used for fixed value length like INTEGER, CHAR, BOOLEAN, etc.
+--  * external (e) allows out-of-line storage but not compression. It could be used for BLOB data if we need to store it uncompressed on a different file.
+--  * main allows compression but not out-of-line storage. Is used for numeric and decimal.  (* it will allow out-of-line storage when the row is too big to fit in 1 page, postgres won’t break for this).
+--  * extended (x) allows both compression and out-of-line storage. Is the default strategy for TOAST-able data types like VARCHAR, TEXT, JSON. Compression will be attempted first, then out-of-line storage if the row is still too big.
+
+-- The default storage strategy for BLOB (BYTEA) is extended (x).
+-- You can change the storage strategy for a column using ALTER TABLE your_table ALTER COLUMN your_column SET STORAGE EXTERNAL;
 
 
 -- Let's see what is the default storage strategy for each data type
@@ -216,4 +252,4 @@ WHERE attrelid = 'simple_type_check'::regclass AND attnum > 0;
 --  varchar | x
 --  uuid    | p
 --  inet    | m
---  blob    | x --> defualt storage is extended (x). It may change to external if the file is too big or does it need to be manually set to external?
+--  blob    | x --> defualt storage is extended (x). You can set it manually to external if you need it.
