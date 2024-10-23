@@ -38,14 +38,14 @@ SELECT
     relkind, -- Table (r), Index (i), View (v), TOAST(t)  
     relpages, -- Number of pages
     reltuples, -- Number of rows
-    relhasindex  -- Has an index
+    relhasindex,  -- Has an index
+    relfilenode -- File node number, start of the relation.
 FROM pg_class 
-WHERE relnamespace::regnamespace = 'webstore'::regnamespace
-;
-  
---   oid  | relnamespace | relname  | relkind | relpages | reltuples | relhasindex 
--- -------+--------------+----------+---------+----------+-----------+-------------
---  16404 | webstore     | customer | r       |        1 |        40 | f
+WHERE relnamespace::regnamespace = 'webstore'::regnamespace;
+
+--   oid  | relnamespace | relname  | relkind | relpages | reltuples | relhasindex | relfilenode 
+-- -------+--------------+----------+---------+----------+-----------+-------------+-------------
+--  16514 | webstore     | customer | r       |        1 |        40 | f           |       16514
 
 
 CREATE INDEX ix_customer ON customer USING btree (id, email);
